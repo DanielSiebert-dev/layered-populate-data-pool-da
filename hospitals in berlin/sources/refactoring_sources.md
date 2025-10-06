@@ -36,11 +36,15 @@
 
 ## 2.6 proposed dataset: 80 columns, 24 rows
 ## 2.7 outstanding discussion about columns with many missings, e.g. opening_hours, source, brand
+- source could be hard-coded with OSM
 
 
 # 3 Old data
 - 75 rows, 12 columns
 - contains also information grouped as clinic data, e.g. Tagesklinik
+- 3 additional columns: bed, distance (to a reference point), cases
+- is there any option to get updated data if required?
+- what does distance mean? to Berlin Mitte?
 
 # 4 Join old and new data
 ## 4.1 joined by name: cumbersome a typos and different spelling of same hospital name
