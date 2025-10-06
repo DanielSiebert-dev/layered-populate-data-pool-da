@@ -59,3 +59,9 @@
 - data not static
 - easy update
 - extension to other cities others than Berlin
+
+# 5 Decision
+- OSM data is used without any modification/deletion of rows
+- OSM data is used with tag information (amenity, healthcare, hospital or clinic)
+- old data, especially beds, distance and cases will not be added to OSM dataset
+- OSM dataset will be name hospital_osm
