@@ -1,67 +1,68 @@
-# 1. Source considerations
-## 1.1 Current sources should be replaced
-## 1.2 OSM data should be used   
-- content of old data columns should be replaced by OSM data if possible, investigations whether old columns can be reused and joined
-- content should be easily retrieved
-- required updates should be easily implemented in future releases
-- it should be challenged whether "old" content is really required in the light of future updates and extension to other cities
+# 1. Sources 
+OSM data is used 
 
-# 2. OSM data
-## 2.1 Available tags in OSM:
-  - amenity: hospital
-  - amenity: clinic
-  - healthcare: hospital, clinic
-### 2.1.1 amenity: hospital
-- 58 entries, 89 columns
-- contains not only hopsitals, but also clinics, e.g. Gemeinschaftspraxis Michael Balschin, Vadim Rubinstein, Irina Rabinovich
-### 2.1.2 amenity: clinic
-- 180 entries, 88 columns (no bed column)
-- contains also hopsitals, e.g. Charité Comprehensive Cancer Center 
-## 2.2: which data should go in this layer and who decided what is needed?
+## 1.1 amenity=* is the older tagging scheme
+Traditionally, amenity=hospital and amenity=clinic were used.
+Many OSM objects are still tagged this way because it was the original convention.
 
-## 2.3 row deletion
-- my proposal: delete Ärtze, Ärztehaus, Versorgungszentrum, etc.
-  --> but for future use also in other cities this might not be a clean option
-- after deletion 22 entries in clincis and 58 in hospitals
-- total 80 entries
+## 1.2. healthcare=* is the newer tagging scheme
+The OSM healthcare tagging scheme was introduced later to be more flexible and precise.
+healthcare=hospital or healthcare=clinic is now the recommended way.
+But adoption is still ongoing, so not everything has been updated.
 
-  ## 2.4 relevant columns:
-"name", "geometry", "operator", "brand", "addr:city", "addr:street", "addr:housenumber", "addr:postcode", "addr:suburb", 
-"phone","email", "website", "wheelchair", "toilets:wheelchair", "beds", "emergency", "healthcare:speciality","opening_hours","source"  
+## 1.3. Overlap in practice
 
-## 2.5 data derivation
-- longitude, latitude using geometry
-- district, district_id, neighborhood using reverse geolocation
+Often there are both tags used on the same feature (e.g., a hospital may have amenity=hospital and healthcare=hospital).
+But some places may only have one of the two, depending on the mapper’s preference or when it was mapped.
 
+## 1.4 both tags with both, hospital and clinic are used to retrieve OSM data
+- there are 35 mismatches in the tags, but I decided to keep the information as is
 
-## 2.6 proposed dataset: 80 columns, 24 rows
-## 2.7 outstanding discussion about columns with many missings, e.g. opening_hours, source, brand
-- source could be hard-coded with OSM
+# 2. Data manipulation
+## 2.1 drivations
+- longitude and latitude from column geometry
+- addr:country set to DE if NULL and addr:city is Berlin
+- district, district_id and neighborhood by using reverse geolocation
+- replaced NULL values with "unknown"
 
+## 2.2 columns and type reformatting
+- columns beds and brand dropped
+- source hardcoded to OSM if NULL
+- stardized column names
+- converted certain colums to correct type
+- normalized yes/no column "wheelchair" to Boolean
 
-# 3 Old data
-- 75 rows, 12 columns
-- contains also information grouped as clinic data, e.g. Tagesklinik
-- 3 additional columns: bed, distance (to a reference point), cases
-- is there any option to get updated data if required?
-- what does distance mean? to Berlin Mitte?
+## 2.3 address
+- I decided to store the address parts as available in OSM. They are seperated and not concatenated
 
-# 4 Join old and new data
-## 4.1 joined by name: cumbersome a typos and different spelling of same hospital name
-- rename of old hospital name to match OSM data
-- 105 rows:
-  - both    50
-  - new     30
-  - old     25
+# 3. Dataset description
 
-# Do we really want to jump through hoops to get the data, just for bed, distance and cases?
-# proposal: use OSM data and don't try to add and clean data to get similar result as in old dataset
-- data not static
-- easy update
-- extension to other cities others than Berlin
+| column | Description | dtype | example
+| ----------- | ----------- | ----------- | ----------- |
+| name | name of hospital or clinic | object | Helios Arthropädicum Kaulsdorf |
+| operator | operator of hospital or clinic | object | Helios Kliniken |
+| country | country of hospital or clinic | object | DE |
+| city | city of hospital or clinic | object | Berlin |
+| street | street of hospital or clinic | object |  Heinrich-Grüber-Straße |
+| housenumber | housenumber of hospital or clinic | object | 9 |
+| postcode | postcode of street and housenumber of hospital or clinic | object | 12621 |
+| heighborhood | neighborhood of hospital or clinic | object | Kaulsdorf |
+| phone | phone number of hospital or clinic | object | +49 30 54707477 |
+| email | email of hospital or clinic | object |  unknown|
+| website | website of hospital or clinic | object | https://www.helios-gesundheit.de/ambulant/berlin-kaulsdorf-arthropaedicum-fachaerzte/ |
+| wheelchair | accessibilit by wheelchair of hospital or clinic | object | False|
+| toilets_wheelchair | accessibilit of toilets by wheelchair of hospital or clinic | object | yes |
+| emergency | emergency unit available of hospital or clinic | object | yes |
+| speciality | speciality area of hospital or clinic | object | xurgery;general |
+| opening_hours | opening hours of hospital or clinic | object | Mo,Tu,Th 08:00-18:00; We,Fr 08:00-12:00 |
+| latitude | latitude of location | float64 | 52.439692 |
+| longitude | longitude of location | float 64  13.500167|
+| geometry | geometry of hospital or clinic | geometry| POINT (13.50017 52.43969) |
+| source | source of data | object | OSM |
+| amenity_tag | content of amenity tag | object | clinic |
+| healthcare_tag | content of healtcare tag | object | clinic |
+| district | district of hospital or clinic | object | Steglitz-Zehlendorf |
+| district_id | district_id of hospital or clinic | object | 11006006 |
 
-# 5 Decision
-- OSM data is used without any modification/deletion of rows
-- OSM data is used with tag information (amenity, healthcare, hospital or clinic)
-- old data, especially beds, distance and cases will not be added to OSM dataset
-- OSM dataset will be name hospital_osm
+   
+  
