@@ -31,6 +31,7 @@ area["name"="Berlin"]["boundary"="administrative"]->.searchArea;
 out center tags;
 """
 
+
 # --- Step 2: Request data from Overpass API ---
 url = "https://overpass-api.de/api/interpreter"
 print("Requesting data from Overpass API...")
@@ -54,6 +55,7 @@ for el in data['elements']:
         "city": tags.get("addr:city", ""),
         "opening_hours": tags.get("opening_hours", ""),
         "phone": tags.get("phone", ""),
+        "email": tags.get("email", ""),
         "website": tags.get("website", ""),
         "wheelchair": tags.get("wheelchair", ""),
         # Some elements are 'nodes', some are 'ways' or 'relations'. Ways/relations use 'center' for coordinates.
