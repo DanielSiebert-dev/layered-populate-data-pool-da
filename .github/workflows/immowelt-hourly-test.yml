@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 393-data-integration-automating-immowelt-scraper-step-2-preliminary-research-on-automation-with-github-actions
+      - Oleksandra-Protsenko-393-data-integration-automating-immowelt-scraper-step-2-preliminary-research-on-automation-with-github-actions
     paths:
       - '.github/workflows/immowelt-hourly-test.yml'
       - '.github/scripts/neon_append_timestamp.py'
