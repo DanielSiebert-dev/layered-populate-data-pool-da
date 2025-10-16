@@ -1,7 +1,7 @@
 # 🧩 Immowelt Daily Fetch — Deployment via AWS Lambda + EventBridge
 
-This document explains how to deploy and schedule **Immowelt data-fetch script** securely using **AWS Lambda** and **EventBridge**.  
-The script collects daily listings from Immowelt and writes them to PostgreSQL database.
+This document describes how to deploy and schedule the **Immowelt data-fetch pipeline** securely using **AWS Lambda** and **EventBridge**.  
+The script collects daily long-term rental listings from Immowelt and writes them to the PostgreSQL database.
 
 ---
 
@@ -17,7 +17,24 @@ Automate the daily data-fetch pipeline in a secure, serverless environment.
 - AWS CloudWatch (Logs)
 - PostgreSQL (Target database)
 
+👉 Implementation scaffold: [`long-term-listings/lambda/`](./long-term-listings/lambda/)
+
 ---
+
+### 🌐 Networking Notes
+- Lambda runs **inside the VPC** (private subnet) → outbound via **NAT gateway**.
+- Use an **S3 Gateway VPC Endpoint** (free) if reading/writing S3 from inside the VPC.
+- Enforce DB TLS (e.g., `sslmode=verify-full`); consider **RDS Proxy + IAM authentication** for production setups.
+
+---
+
+### 💸 Cost Snapshot (Lambda)
+- 512 MB for 10 s ≈ **$0.000085 per run**
+- 1 × per day ≈ **$0.0026 / month** • 100 × per day ≈ **$0.25 / month**
+- For short data-fetch jobs, costs are effectively negligible.
+
+---
+
 
 ## 🧩 Step 1 — Preparation
 
@@ -26,6 +43,15 @@ Automate the daily data-fetch pipeline in a secure, serverless environment.
    - Lambda functions  
    - Secrets Manager secrets  
    - EventBridge rules  
+
+   ### 🔑 AWS Login (SSO, QA)
+```bash
+aws configure sso
+# SSO start URL: https://d-996752790a.awsapps.com/start/#
+# SSO region: eu-central-1
+aws sso login
+aws sts get-caller-identity
+```
 
 3. **Package the script**  
    Creating a ZIP file with main script and dependencies:
@@ -36,6 +62,16 @@ Include only the required libraries:
 psycopg2-binary
 requests
 pandas
+
+```markdown
+### ✅ QA Test Plan (what I’ll validate)
+- Lambda runs in QA VPC (private subnet) and reaches the internet via NAT.
+- Writes to **QA PostgreSQL** succeed.
+- Total runtime < **15 minutes** (otherwise consider ECS Fargate).
+- No duplicates thanks to **UPSERT**; counts are logged.
+- CloudWatch logs show clean run (no connection errors).
+```
+**Promote to prod** once all the above are green (same Terraform module, prod vars).
 
 ---
 
@@ -141,8 +177,3 @@ Step	Action	AWS Service
 - Cold starts may slightly delay the first execution  
 - Harder to debug long-running or multi-step workflows, consider Airflow (MWAA) later for orchestration
 
----
-
-**Author:** Data Engineering Team  
-**Status:** Draft ✅  
-**Goal:** Daily Immowelt → PostgreSQL sync (secure & automated)
