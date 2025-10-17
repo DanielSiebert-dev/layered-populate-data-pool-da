@@ -46,10 +46,9 @@ Automate the daily data-fetch pipeline in a secure, serverless environment.
 
    ### 🔑 AWS Login (SSO, QA)
 ```bash
-aws configure sso
-# SSO start URL: https://d-996752790a.awsapps.com/start/#
-# SSO region: eu-central-1
-aws sso login
+### 🔑 AWS Login (SSO, QA)
+```bash
+aws sso login --profile ReadOnlyAccess-489962060388
 aws sts get-caller-identity
 ```
 
